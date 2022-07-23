@@ -1,20 +1,16 @@
-# vue-project
+# Deadline-Watcher
 
-This template should help get you started developing with Vue 3 in Vite.
+This project aims to visualize the next deadlines it gets from a JSON-API (not implemented). 
 
 ## Recommended IDE Setup
 
 [VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur) + [TypeScript Vue Plugin (Volar)](https://marketplace.visualstudio.com/items?itemName=Vue.vscode-typescript-vue-plugin).
 
-## Customize configuration
+## JSON structure
 
-See [Vite Configuration Reference](https://vitejs.dev/config/).
+The following table describes the required (and optional) JSON-input format.
 
-## Project Setup
-
-```sh
-npm install
-```
+TBD!
 
 ### Compile and Hot-Reload for Development
 
