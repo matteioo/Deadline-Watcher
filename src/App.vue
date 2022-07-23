@@ -33,20 +33,30 @@ export default {
                     lva: "FMO"
                 },
                 {
-                    date: new Date(2022, 10, 22, 16),
+                    date: new Date(2022, 6, 27, 16),
                     title: "Entry D",
                     lva: "ADM"
                 },
-				{
-					date: new Date(),
-					title: "new Date() - 1",
-					lva: "OOM"
-				},
-				{
-					date: new Date(),
-					title: "new Date() - 2",
-					lva: "OOM"
-				}
+                {
+                    date: new Date(2022, 6, 23, 23, 45),
+                    title: "Today2",
+                    lva: "FMO"
+                },
+                {
+                    date: new Date(2022, 6, 23, 23, 30),
+                    title: "Today1",
+                    lva: "FMO"
+                },
+                {
+                    date: new Date(2022, 6, 24, 23, 45),
+                    title: "Tomorrow2",
+                    lva: "FMO"
+                },
+                {
+                    date: new Date(2022, 6, 24, 23, 30),
+                    title: "Tomorrow1",
+                    lva: "FMO"
+                }
             ],
             entriesAdvanced: [
                 {
@@ -94,7 +104,7 @@ export default {
 
 			return this.entries.filter(entry => categories.has(entry.lva));
 		},
-		visibleEntries() {
+		VisibleEntries() {
 			let arr = new Array();
 
 			for(let i = 0; i < this.entries.length; i++) {
@@ -106,18 +116,69 @@ export default {
 			return arr;
 		},
 		VisibleEntriesToday() {
-			console.log(this.VisibleEntries);
-
 			return this.VisibleEntries.filter(entry => {
-				let entryDate = entry.date.setUTCHours(0, 0, 0, 0);
+				let entryDate = entry.date;
 				let currentDate = new Date();
-				currentDate = currentDate.setUTCHours(0, 0, 0, 0);
 
-				console.log(entryDate);
-				console.log(currentDate);
+				return entryDate.toLocaleDateString() === currentDate.toLocaleDateString();
+			});
+		},
+		VisibleEntriesTomorrow() {
+			return this.VisibleEntries.filter(entry => {
+				let entryDate = new Date(entry.date.getTime());
+				entryDate = new Date(entryDate.setHours(0, 0, 0, 0));
 
+				let tomorrowDate = new Date();
+				tomorrowDate = new Date(tomorrowDate.setHours(0, 0, 0, 0));
+				tomorrowDate.setDate(tomorrowDate.getDate() + 1);
 
-				return entryDate === currentDate;
+				return entryDate.toLocaleDateString() === tomorrowDate.toLocaleDateString();
+			});
+		},
+		VisibleEntriesThisWeek() {
+			return this.VisibleEntries.filter(entry => {
+				let entryDate = new Date(entry.date.getTime());
+				entryDate = new Date(entryDate.setHours(0, 0, 0, 0));
+
+				let currentDate = new Date();
+				currentDate = new Date(currentDate.setHours(0, 0, 0, 0));
+				currentDate.setDate(currentDate.getDate());
+
+				const weekDay = currentDate.getDay() != 0 ? currentDate.getDay() - 1 : 6;
+
+				let nextSunday = new Date();
+				nextSunday.setDate(currentDate.getDate() + (6 - weekDay));
+
+				// console.log(weekDay);
+				// console.log(currentDate);
+				// console.log(nextSunday);
+
+				currentDate.setDate(currentDate.getDate() + 2);
+
+				return (entryDate.getTime() >= currentDate.getTime()) && (entryDate.getTime() <= nextSunday.getTime());
+			});
+		},
+		VisibleEntriesNextWeek() {
+			return this.VisibleEntries.filter(entry => {
+				let entryDate = new Date(entry.date.getTime());
+				entryDate = new Date(entryDate.setHours(0, 0, 0, 0));
+
+				let currentDate = new Date();
+				currentDate = new Date(currentDate.setHours(0, 0, 0, 0));
+				currentDate.setDate(currentDate.getDate());
+
+				const weekDay = currentDate.getDay() != 0 ? currentDate.getDay() - 1 : 6;
+
+				let nextNextMonday = new Date();
+				nextNextMonday.setDate(currentDate.getDate() + (6 - weekDay) + 8);
+
+				let nextNextSunday = new Date();
+				nextNextSunday.setDate(nextNextMonday.getDate() + 6);
+
+				console.log(nextNextMonday);
+				console.log(nextNextSunday);
+
+				return (entryDate.getTime() >= nextNextMonday.getTime()) && (entryDate.getTime() <= nextNextSunday.getTime());
 			});
 		}
 	},
@@ -157,7 +218,7 @@ export default {
 		this.entries.sort((a, b) => {
 			return a.date - b.date;
 		});
-
+		
 		this.entries = this.entries.filter((entry) => (entry.date >= new Date()));
 
 		for(let i = 0; i < this.entries.length; i++) {
@@ -183,40 +244,40 @@ export default {
 					</div>
 				</div>
 			</aside>
-			<section v-if="visibleEntries.length > 0" class="flex flex-col gap-2">
+			<section v-if="VisibleEntries.length > 0" class="flex flex-col gap-2">
 				<div>
-					<h2 class="mx-4 text-lg font-medium font-sans-rounded uppercase text-gray-100 sticky top-0 bg-gray-900/80 backdrop-blur-md -mt-2 pt-2 -mb-1 pb-1 border-b border-gray-800">Heute</h2>
-					<div v-for="entry in visibleEntriesToday">
+					<h2 class="mx-4 text-lg font-medium font-sans-rounded uppercase text-gray-100 sticky top-0 bg-gray-900/80 backdrop-blur-md -mt-2 pt-2 -mb-1 pb-1 border-b border-gray-800">Heute ({{ VisibleEntriesToday.length }})</h2>
+					<div v-for="entry in VisibleEntriesToday">
 						<Entry :title="entry.title" :category="entry.lva" :date-time="dateToString(entry.date)"/>
 					</div>
 				</div>
 				<div>
-					<h2 class="mx-4 text-lg font-medium font-sans-rounded uppercase text-gray-100 sticky top-0 bg-gray-900/80 backdrop-blur-md -mt-2 pt-2 -mb-1 pb-1 border-b border-gray-800">Diese Woche</h2>
-					<div v-for="entry in visibleEntries">
+					<h2 class="mx-4 text-lg font-medium font-sans-rounded uppercase text-gray-100 sticky top-0 bg-gray-900/80 backdrop-blur-md -mt-2 pt-2 -mb-1 pb-1 border-b border-gray-800">Morgen ({{ VisibleEntriesTomorrow.length }})</h2>
+					<div v-for="entry in VisibleEntriesTomorrow">
 						<Entry :title="entry.title" :category="entry.lva" :date-time="dateToString(entry.date)"/>
 					</div>
 				</div>
 				<div>
-					<h2 class="mx-4 text-lg font-medium font-sans-rounded uppercase text-gray-100 sticky top-0 bg-gray-900/80 backdrop-blur-md -mt-2 pt-2 -mb-1 pb-1 border-b border-gray-800">Nächste Woche</h2>
-					<div v-for="entry in visibleEntries">
+					<h2 class="mx-4 text-lg font-medium font-sans-rounded uppercase text-gray-100 sticky top-0 bg-gray-900/80 backdrop-blur-md -mt-2 pt-2 -mb-1 pb-1 border-b border-gray-800">Nächste Woche ({{ VisibleEntriesThisWeek.length }})</h2>
+					<div v-for="entry in VisibleEntriesThisWeek">
 						<Entry :title="entry.title" :category="entry.lva" :date-time="dateToString(entry.date)"/>
 					</div>
 				</div>
 				<div>
-					<h2 class="mx-4 text-lg font-medium font-sans-rounded uppercase text-gray-100 sticky top-0 bg-gray-900/80 backdrop-blur-md -mt-2 pt-2 -mb-1 pb-1 border-b border-gray-800">Übernächste Woche</h2>
-					<div v-for="entry in visibleEntries">
+					<h2 class="mx-4 text-lg font-medium font-sans-rounded uppercase text-gray-100 sticky top-0 bg-gray-900/80 backdrop-blur-md -mt-2 pt-2 -mb-1 pb-1 border-b border-gray-800">Übernächste Woche ({{ VisibleEntries.length }})</h2>
+					<div v-for="entry in VisibleEntriesNextWeek">
 						<Entry :title="entry.title" :category="entry.lva" :date-time="dateToString(entry.date)"/>
 					</div>
 				</div>
 				<div>
-					<h2 class="mx-4 text-lg font-medium font-sans-rounded uppercase text-gray-100 sticky top-0 bg-gray-900/80 backdrop-blur-md -mt-2 pt-2 -mb-1 pb-1 border-b border-gray-800">Später</h2>
-					<div v-for="entry in visibleEntries">
+					<h2 class="mx-4 text-lg font-medium font-sans-rounded uppercase text-gray-100 sticky top-0 bg-gray-900/80 backdrop-blur-md -mt-2 pt-2 -mb-1 pb-1 border-b border-gray-800">Später ({{ VisibleEntries.length }})</h2>
+					<div v-for="entry in VisibleEntries">
 						<Entry :title="entry.title" :category="entry.lva" :date-time="dateToString(entry.date)"/>
 					</div>
-					<div v-for="entry in visibleEntries">
+					<div v-for="entry in VisibleEntries">
 						<Entry :title="entry.title" :category="entry.lva" :date-time="dateToString(entry.date)"/>
 					</div>
-					<div v-for="entry in visibleEntries">
+					<div v-for="entry in VisibleEntries">
 						<Entry :title="entry.title" :category="entry.lva" :date-time="dateToString(entry.date)"/>
 					</div>
 				</div>
