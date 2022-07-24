@@ -11,5 +11,7 @@ module.exports = {
 			'sans-rounded': ['Asap', ...defaultTheme.fontFamily.sans]
 		}
 	},
-	plugins: [],
+	plugins: [
+		require('@tailwindcss/line-clamp')
+	],
   }

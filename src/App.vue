@@ -1,25 +1,18 @@
 <script>
-import Entry from './components/Entry.vue'
 import EntryList from './components/EntryList.vue'
 import { SparklesIcon } from '@heroicons/vue/outline'
-import { CalendarIcon } from '@heroicons/vue/solid'
 import externalEntries from './assets/testDates.json'
 
 export default {
 	components: {
 		SparklesIcon,
-		Entry,
-		EntryList
+		EntryList,
 	},
     data() {
         return {
 			categories: new Set(),
 			visibleCategories: new Set(),
-			datedSections: {
-				today: [],
-				currentWeek: [],
-				nextWeek: []
-			},
+			toggleSidebar: false,
 			entries: externalEntries,
             entriesAdvanced: [
                 {
@@ -159,10 +152,10 @@ export default {
 			// console.log(nextNextSunday);
 
 			if(dayAfterTomorrow.getTime() > nextSunday.getTime()) {
-				console.log("Entry if");
+				// console.log("Entry if");
 				boundingDays[0] = new Date(dayAfterTomorrow.getTime());
 			} else {
-				console.log("Entry else")
+				// console.log("Entry else");
 				boundingDays[0] = new Date(nextSunday.getTime());
 			}
 
@@ -238,11 +231,7 @@ export default {
 	mounted() {
 		for(let i = 0; i < this.entries.length; i++) {
 			this.entries[i].date = this.convertDateTime(this.entries[i].date);
-			
-			console.log(this.entries[i]);
 		}
-
-		console.log(this.entries);
 
 		this.entries.sort((a, b) => {
 			return a.date - b.date;
@@ -254,26 +243,52 @@ export default {
 			this.visibleCategories.add(this.entries[i].lva);
 			this.categories.add(this.entries[i].lva);
 		}
+
+		this.categories.sort((a, b) => {
+			if (a > b) {
+				return -1;
+			}
+			if (b > a) {
+				return 1;
+			}
+			return 0;
+		});
 	}
 }
 </script>
 
 <template>
-	<div class="w-full h-full bg-gray-900">
-		<main class="min-h-screen text-gray-100 mx-auto py-2 max-w-fit flex flex-row gap-8">
-			<aside>
+	<div class="w-full h-full bg-gray-900 px-2">
+		<main class="min-h-screen text-gray-100 mx-auto py-2 max-w-screen-sm flex flex-row gap-4">
+			<aside class="shrink-0 hidden sm:block">
 				<div class="sticky top-2">
 					<!-- <div v-for="category in categories">
 						<button @click="toggleCategory(category)">Toggle {{ category }}</button>
 						<br>
 					</div> -->
 					<div v-for="category in categories">
-						<input type="checkbox" :id="category" :value="category" v-model="visibleCategories" class="mr-2">
-						<label :for="category">{{ category }}</label>
+						<div class="px-2 py-1 my-1">
+							<input type="checkbox" :id="category" :value="category" v-model="visibleCategories" class="mr-2">
+							<label :for="category">{{ category }}</label>
+						</div>
 					</div>
 				</div>
 			</aside>
-			<section v-if="VisibleEntries.length > 0" class="flex flex-col gap-2">
+			<aside class="shrink-0 sm:hidden bg-gray-700 absolute">
+				<div class="sticky top-2">
+					<!-- <div v-for="category in categories">
+						<button @click="toggleCategory(category)">Toggle {{ category }}</button>
+						<br>
+					</div> -->
+					<div v-for="category in categories">
+						<div class="px-2 py-1 my-1">
+							<input type="checkbox" :id="category" :value="category" v-model="visibleCategories" class="mr-2">
+							<label :for="category">{{ category }}</label>
+						</div>
+					</div>
+				</div>
+			</aside>
+			<section v-if="VisibleEntries.length > 0" class="flex flex-col gap-2 w-full">
 				<EntryList title="Heute" :entries="VisibleEntriesToday"/>
 				<EntryList title="Morgen" :entries="VisibleEntriesTomorrow"/>
 				<EntryList title="Diese Woche" :entries="VisibleEntriesThisWeek"/>
