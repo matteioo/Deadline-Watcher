@@ -2,12 +2,19 @@
 import { CalendarIcon } from '@heroicons/vue/solid'
 
 export default {
-  components: { CalendarIcon },
-  props: {
-	title: String,
-	dateTime: String,
-	category: String
-  }
+	components: { CalendarIcon },
+	props: {
+		title: String,
+		dateTime: Date,
+		category: String
+	},
+	methods: {
+        dateToString(date) {
+            const weekday = ["So", "Mo", "Di", "Mi", "Do", "Fr", "Sa"];
+            let day = weekday[date.getDay()];
+            return day + " " + date.toLocaleDateString("de-AT") + " · " + date.toLocaleTimeString("de-AT");
+        },
+	}
 }
 </script>
 
@@ -19,7 +26,7 @@ export default {
 		</div>
 		<div class="flex items-center text-gray-300 text-sm">
 			<CalendarIcon class="h-4 w-4 mr-2"/>
-			<div>{{ dateTime }}</div>
+			<div>{{ dateToString(dateTime) }}</div>
 		</div>
 	</a>
 </template>

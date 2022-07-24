@@ -1,12 +1,16 @@
 <script>
 import Entry from './components/Entry.vue'
+import EntryList from './components/EntryList.vue'
 import { SparklesIcon } from '@heroicons/vue/outline'
 import { CalendarIcon } from '@heroicons/vue/solid'
+import externalEntries from './assets/testDates.json'
 
 export default {
 	components: {
-		'SparklesIcon': SparklesIcon,
-		'Entry': Entry },
+		SparklesIcon,
+		Entry,
+		EntryList
+	},
     data() {
         return {
 			categories: new Set(),
@@ -16,48 +20,7 @@ export default {
 				currentWeek: [],
 				nextWeek: []
 			},
-            entries: [
-                {
-                    date: new Date(2022, 8, 22, 16),
-                    title: "Entry A",
-                    lva: "AGD"
-                },
-                {
-                    date: new Date(2022, 5, 22, 16),
-                    title: "Entry B",
-                    lva: "FMO"
-                },
-                {
-                    date: new Date(2022, 9, 23, 20),
-                    title: "Entry C",
-                    lva: "FMO"
-                },
-                {
-                    date: new Date(2022, 6, 27, 16),
-                    title: "Entry D",
-                    lva: "ADM"
-                },
-                {
-                    date: new Date(2022, 6, 23, 23, 45),
-                    title: "Today2",
-                    lva: "FMO"
-                },
-                {
-                    date: new Date(2022, 6, 23, 23, 30),
-                    title: "Today1",
-                    lva: "FMO"
-                },
-                {
-                    date: new Date(2022, 6, 24, 23, 45),
-                    title: "Tomorrow2",
-                    lva: "FMO"
-                },
-                {
-                    date: new Date(2022, 6, 24, 23, 30),
-                    title: "Tomorrow1",
-                    lva: "FMO"
-                }
-            ],
+			entries: externalEntries,
             entriesAdvanced: [
                 {
                     date: new Date(2022, 6, 18, 20),
@@ -136,61 +99,104 @@ export default {
 			});
 		},
 		VisibleEntriesThisWeek() {
-			return this.VisibleEntries.filter(entry => {
-				let entryDate = new Date(entry.date.getTime());
-				entryDate = new Date(entryDate.setHours(0, 0, 0, 0));
+			// Calculate todays date
+			let today = new Date();
+			today.setHours(0, 0, 0, 0);
 
-				let currentDate = new Date();
-				currentDate = new Date(currentDate.setHours(0, 0, 0, 0));
-				currentDate.setDate(currentDate.getDate());
+			// Calculate the date of the day after tomorrow (because the entries of today and tomorrow must be ignored)
+			let dayAfterTomorrow = new Date(today.getTime());
+			dayAfterTomorrow = new Date(dayAfterTomorrow.setDate(dayAfterTomorrow.getDate() + 2));
+			
+			// Calculate which day in the week it is; (6 - weekDay) calculates the days till next sunday
+			// 0 = Monday ... 6 = Sunday
+			const weekDay = today.getDay() != 0 ? today.getDay() - 1 : 6;
+			
+			let nextSunday = new Date(today.getTime());
+			nextSunday.setDate(today.getDate() + (6 - weekDay));
+			nextSunday.setHours(23, 59, 59, 999);
 
-				const weekDay = currentDate.getDay() != 0 ? currentDate.getDay() - 1 : 6;
+			// console.log(today);
+			// console.log(dayAfterTomorrow);
+			// console.log(nextSunday);
 
-				let nextSunday = new Date();
-				nextSunday.setDate(currentDate.getDate() + (6 - weekDay));
+			let boundingDays = [new Date(dayAfterTomorrow.getTime()), new Date(nextSunday.getTime())];
 
-				// console.log(weekDay);
-				// console.log(currentDate);
-				// console.log(nextSunday);
+			// No days left in current week (already considered without entries of today and tomorrow), return empty array
+			if(dayAfterTomorrow.getTime() > nextSunday.getTime()) {
+				return new Array();
+			}
 
-				currentDate.setDate(currentDate.getDate() + 2);
-
-				return (entryDate.getTime() >= currentDate.getTime()) && (entryDate.getTime() <= nextSunday.getTime());
-			});
+			return this.VisibleEntries.filter(entry => (entry.date.getTime() >= boundingDays[0].getTime()) && (entry.date.getTime() <= boundingDays[1].getTime()));
 		},
 		VisibleEntriesNextWeek() {
-			return this.VisibleEntries.filter(entry => {
-				let entryDate = new Date(entry.date.getTime());
-				entryDate = new Date(entryDate.setHours(0, 0, 0, 0));
+			// Calculate todays date
+			let today = new Date();
+			today.setHours(0, 0, 0, 0);
 
-				let currentDate = new Date();
-				currentDate = new Date(currentDate.setHours(0, 0, 0, 0));
-				currentDate.setDate(currentDate.getDate());
+			// Calculate the date of the day after tomorrow (because the entries of today and tomorrow must be ignored)
+			let dayAfterTomorrow = new Date(today.getTime());
+			dayAfterTomorrow = new Date(dayAfterTomorrow.setDate(dayAfterTomorrow.getDate() + 2));
+			
+			// Calculate which day in the week it is; (6 - weekDay) calculates the days till next sunday
+			// 0 = Monday ... 6 = Sunday
+			const weekDay = today.getDay() != 0 ? today.getDay() - 1 : 6;
+			
+			let nextSunday = new Date(today.getTime());
+			nextSunday.setDate(today.getDate() + (6 - weekDay));
+			nextSunday.setHours(23, 59, 59, 999);
 
-				const weekDay = currentDate.getDay() != 0 ? currentDate.getDay() - 1 : 6;
+			let nextNextSunday = new Date(nextSunday.getTime());
+			nextNextSunday.setDate(nextSunday.getDate() + 7);
 
-				let nextNextMonday = new Date();
-				nextNextMonday.setDate(currentDate.getDate() + (6 - weekDay) + 8);
+			let boundingDays = [new Date(), new Date(nextNextSunday.getTime())];
+			// console.log("today");
+			// console.log(today);
+			// console.log("dayAfterTomorrow");
+			// console.log(dayAfterTomorrow);
+			// console.log("nextSunday");
+			// console.log(nextSunday);
+			// console.log("nextNextSunday");
+			// console.log(nextNextSunday);
 
-				let nextNextSunday = new Date();
-				nextNextSunday.setDate(nextNextMonday.getDate() + 6);
+			if(dayAfterTomorrow.getTime() > nextSunday.getTime()) {
+				console.log("Entry if");
+				boundingDays[0] = new Date(dayAfterTomorrow.getTime());
+			} else {
+				console.log("Entry else")
+				boundingDays[0] = new Date(nextSunday.getTime());
+			}
 
-				console.log(nextNextMonday);
-				console.log(nextNextSunday);
+			return this.VisibleEntries.filter(entry => (entry.date.getTime() >= boundingDays[0].getTime()) && (entry.date.getTime() <= boundingDays[1].getTime()));
+		},
+		VisibleEntriesRemaining() {
+			// Calculate todays date
+			let today = new Date();
+			today.setHours(0, 0, 0, 0);
 
-				return (entryDate.getTime() >= nextNextMonday.getTime()) && (entryDate.getTime() <= nextNextSunday.getTime());
-			});
+			// Calculate the date of the day after tomorrow (because the entries of today and tomorrow must be ignored)
+			let dayAfterTomorrow = new Date(today.getTime());
+			dayAfterTomorrow = new Date(dayAfterTomorrow.setDate(dayAfterTomorrow.getDate() + 2));
+			
+			// Calculate which day in the week it is; (6 - weekDay) calculates the days till next sunday
+			// 0 = Monday ... 6 = Sunday
+			const weekDay = today.getDay() != 0 ? today.getDay() - 1 : 6;
+			
+			let nextMonday = new Date(today.getTime());
+			nextMonday.setDate(today.getDate() + (6 - weekDay) + 1);
+			nextMonday.setHours(0, 0, 0, 0);
+
+			let boundingDays = [new Date(nextMonday.getTime()), new Date()];
+			boundingDays[0].setDate(nextMonday.getDate() + 7);
+			
+			// console.log(boundingDays[0]);
+
+			return this.VisibleEntries.filter(entry => (entry.date.getTime() >= boundingDays[0].getTime()));
 		}
 	},
     methods: {
         getDay(datePar) {
             const weekday = ["So", "Mo", "Di", "Mi", "Do", "Fr", "Sa"];
             return weekday[datePar.getDay()];
-        },
-        dateToString(datePar) {
-            const weekday = ["So", "Mo", "Di", "Mi", "Do", "Fr", "Sa"];
-            let day = weekday[datePar.getDay()];
-            return day + " " + datePar.toLocaleDateString("de-AT") + " · " + datePar.toLocaleTimeString("de-AT");
         },
 		categoryContained(lvaToSearch) {
 			for(let i = 0; i < visibleCategories.length; i++) {
@@ -212,9 +218,32 @@ export default {
 			switch(this.getDay(date)) {
 
 			}
+		},
+		convertDateTime(dateTime){
+			let arr = dateTime.split(" ");
+			
+			let date = arr[0].split(".");
+			let dd = date[0];
+			let mm = date[1]-1;
+			let yyyy = date[2];
+			
+			let time = arr[1].split(":");
+			let h = time[0]; 
+			let m = time[1];
+			let s = parseInt(time[2]); //get rid of that 00.0;
+			
+			return new Date(yyyy,mm,dd,h,m,s);
 		}
-    },
+	},
 	mounted() {
+		for(let i = 0; i < this.entries.length; i++) {
+			this.entries[i].date = this.convertDateTime(this.entries[i].date);
+			
+			console.log(this.entries[i]);
+		}
+
+		console.log(this.entries);
+
 		this.entries.sort((a, b) => {
 			return a.date - b.date;
 		});
@@ -245,42 +274,11 @@ export default {
 				</div>
 			</aside>
 			<section v-if="VisibleEntries.length > 0" class="flex flex-col gap-2">
-				<div>
-					<h2 class="mx-4 text-lg font-medium font-sans-rounded uppercase text-gray-100 sticky top-0 bg-gray-900/80 backdrop-blur-md -mt-2 pt-2 -mb-1 pb-1 border-b border-gray-800">Heute ({{ VisibleEntriesToday.length }})</h2>
-					<div v-for="entry in VisibleEntriesToday">
-						<Entry :title="entry.title" :category="entry.lva" :date-time="dateToString(entry.date)"/>
-					</div>
-				</div>
-				<div>
-					<h2 class="mx-4 text-lg font-medium font-sans-rounded uppercase text-gray-100 sticky top-0 bg-gray-900/80 backdrop-blur-md -mt-2 pt-2 -mb-1 pb-1 border-b border-gray-800">Morgen ({{ VisibleEntriesTomorrow.length }})</h2>
-					<div v-for="entry in VisibleEntriesTomorrow">
-						<Entry :title="entry.title" :category="entry.lva" :date-time="dateToString(entry.date)"/>
-					</div>
-				</div>
-				<div>
-					<h2 class="mx-4 text-lg font-medium font-sans-rounded uppercase text-gray-100 sticky top-0 bg-gray-900/80 backdrop-blur-md -mt-2 pt-2 -mb-1 pb-1 border-b border-gray-800">Nächste Woche ({{ VisibleEntriesThisWeek.length }})</h2>
-					<div v-for="entry in VisibleEntriesThisWeek">
-						<Entry :title="entry.title" :category="entry.lva" :date-time="dateToString(entry.date)"/>
-					</div>
-				</div>
-				<div>
-					<h2 class="mx-4 text-lg font-medium font-sans-rounded uppercase text-gray-100 sticky top-0 bg-gray-900/80 backdrop-blur-md -mt-2 pt-2 -mb-1 pb-1 border-b border-gray-800">Übernächste Woche ({{ VisibleEntries.length }})</h2>
-					<div v-for="entry in VisibleEntriesNextWeek">
-						<Entry :title="entry.title" :category="entry.lva" :date-time="dateToString(entry.date)"/>
-					</div>
-				</div>
-				<div>
-					<h2 class="mx-4 text-lg font-medium font-sans-rounded uppercase text-gray-100 sticky top-0 bg-gray-900/80 backdrop-blur-md -mt-2 pt-2 -mb-1 pb-1 border-b border-gray-800">Später ({{ VisibleEntries.length }})</h2>
-					<div v-for="entry in VisibleEntries">
-						<Entry :title="entry.title" :category="entry.lva" :date-time="dateToString(entry.date)"/>
-					</div>
-					<div v-for="entry in VisibleEntries">
-						<Entry :title="entry.title" :category="entry.lva" :date-time="dateToString(entry.date)"/>
-					</div>
-					<div v-for="entry in VisibleEntries">
-						<Entry :title="entry.title" :category="entry.lva" :date-time="dateToString(entry.date)"/>
-					</div>
-				</div>
+				<EntryList title="Heute" :entries="VisibleEntriesToday"/>
+				<EntryList title="Morgen" :entries="VisibleEntriesTomorrow"/>
+				<EntryList title="Diese Woche" :entries="VisibleEntriesThisWeek"/>
+				<EntryList title="Nächste Woche" :entries="VisibleEntriesNextWeek"/>
+				<EntryList title="Später" :entries="VisibleEntriesRemaining"/>
 			</section>
 			<section v-else class="h-fit flex flex-row text-gray-300 items-center content-start">
 				<SparklesIcon class="h-4 w-4 mr-2"/>
