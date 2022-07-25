@@ -269,7 +269,7 @@ export default {
 
 <template>
 	<button @click="sidebarToggled = true" class="z-[5] fixed right-6 bottom-6 rounded-md bg-sky-200 p-1">
-		<AdjustmentsIcon class="h-6 w-6 text-sky-800"/>
+		<AdjustmentsIcon class="h-8 w-8 text-sky-800"/>
 	</button>
 
 	<div v-show="sidebarToggled" class="w-full sm:w-0 h-full sm:h-0 absolute top-0 left-0 z-[5] sm:hidden" @click="sidebarToggled = false"></div>
