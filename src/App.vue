@@ -1,18 +1,22 @@
 <script>
 import EntryList from './components/EntryList.vue'
 import { SparklesIcon } from '@heroicons/vue/outline'
+import { AdjustmentsIcon } from '@heroicons/vue/outline'
 import externalEntries from './assets/testDates.json'
+import { XIcon } from '@heroicons/vue/outline'
 
 export default {
 	components: {
 		SparklesIcon,
 		EntryList,
+		AdjustmentsIcon,
+		XIcon
 	},
     data() {
         return {
 			categories: new Set(),
 			visibleCategories: new Set(),
-			toggleSidebar: false,
+			sidebarToggled: false,
 			entries: externalEntries,
             entriesAdvanced: [
                 {
@@ -186,6 +190,12 @@ export default {
 			return this.VisibleEntries.filter(entry => (entry.date.getTime() >= boundingDays[0].getTime()));
 		}
 	},
+	watch: {
+		sidebarToggled(newsidebarToggled) {
+			document.body.classList.toggle("overflow-hidden");
+			console.log("toggled");
+		}
+	},
     methods: {
         getDay(datePar) {
             const weekday = ["So", "Mo", "Di", "Mi", "Do", "Fr", "Sa"];
@@ -244,37 +254,44 @@ export default {
 			this.categories.add(this.entries[i].lva);
 		}
 
-		this.categories.sort((a, b) => {
-			if (a > b) {
-				return -1;
-			}
-			if (b > a) {
-				return 1;
-			}
-			return 0;
-		});
+		// this.categories.sort((a, b) => {
+		// 	if (a > b) {
+		// 		return -1;
+		// 	}
+		// 	if (b > a) {
+		// 		return 1;
+		// 	}
+		// 	return 0;
+		// });
 	}
 }
 </script>
 
 <template>
-	<div class="w-full h-full bg-gray-900 px-2">
-		<main class="min-h-screen text-gray-100 mx-auto py-2 max-w-screen-sm flex flex-row gap-4">
-			<aside class="shrink-0 hidden sm:block">
-				<div class="sticky top-2">
-					<!-- <div v-for="category in categories">
-						<button @click="toggleCategory(category)">Toggle {{ category }}</button>
-						<br>
-					</div> -->
-					<div v-for="category in categories">
-						<div class="px-2 py-1 my-1">
-							<input type="checkbox" :id="category" :value="category" v-model="visibleCategories" class="mr-2">
-							<label :for="category">{{ category }}</label>
-						</div>
+	<button @click="sidebarToggled = true" class="z-[5] fixed right-6 bottom-6 rounded-md bg-sky-200 p-1">
+		<AdjustmentsIcon class="h-6 w-6 text-sky-800"/>
+	</button>
+
+	<div v-show="sidebarToggled" class="w-full sm:w-0 h-full sm:h-0 absolute top-0 left-0 z-[5] sm:hidden" @click="sidebarToggled = false"></div>
+	<aside v-show="sidebarToggled" class="z-10 fixed bottom-0 left-0 flex flex-col max-h-[75%] w-full p-4 bg-gray-800 text-gray-100 rounded-t-xl">
+		<button class="z-[15] absolute top-4 right-4 p-1" @click="sidebarToggled = false">
+			<XIcon class="h-6 w-6 text-gray-400"/>
+		</button>
+		<div class="flex-grow overflow-scroll w-full">
+			<div class="flex flex-col columns-2">
+				<div v-for="category in categories">
+					<div class="px-2 py-1 w-full inline-flex flex-row items-center">
+						<input type="checkbox" :id="category" :value="category" v-model="visibleCategories" class="mr-2 accent-sky-600">
+						<label :for="category" class="inline-block flex-grow">{{ category }}</label>
 					</div>
 				</div>
-			</aside>
-			<aside class="shrink-0 sm:hidden bg-gray-700 absolute">
+			</div>
+		</div>
+	</aside>
+	
+	<div class="w-full h-full bg-gray-900 px-2" :class="{ 'brightness-50 sm:brightness-100': sidebarToggled }">
+		<main class="min-h-screen text-gray-100 mx-auto py-2 max-w-screen-sm flex flex-row gap-4">
+			<aside class="shrink-0 hidden sm:block">
 				<div class="sticky top-2">
 					<!-- <div v-for="category in categories">
 						<button @click="toggleCategory(category)">Toggle {{ category }}</button>

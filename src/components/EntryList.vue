@@ -18,7 +18,7 @@ export default {
 
 <template>
 	<div v-if="entries.length > 0">
-		<div class="flex flex-row justify-between items-center mx-4 sm:text-lg font-medium font-sans-rounded text-gray-100 sticky top-0 [@supports(backdrop-filter:blur(0))]:bg-gray-900/30 bg-gray-900/70 -mt-2 pt-2 -mb-1 pb-1 [@supports(backdrop-filter:blur(0))]:border-b-0 border-b border-gray-800 backdrop-blur-sm">
+		<div class="flex flex-row justify-between items-center mx-4 [@supports(backdrop-filter:blur(0))]:mx-0 [@supports(backdrop-filter:blur(0))]:px-4 sm:text-lg font-medium font-sans-rounded text-gray-100 sticky top-0 [@supports(backdrop-filter:blur(0))]:bg-gray-900/30 bg-gray-900/70 -mt-2 pt-2 -mb-1 pb-1 [@supports(backdrop-filter:blur(0))]:border-b-0 border-b border-gray-800 backdrop-blur-sm">
 			<h2 class="uppercase">{{ title }}</h2>
 			<Badge :count="entries.length"/>
 		</div>
