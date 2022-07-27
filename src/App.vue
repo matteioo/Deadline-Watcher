@@ -1,5 +1,5 @@
 <script>
-import EntryList from './components/EntryList.vue'
+import EntryList from './components/entries/EntryList.vue'
 import { SparklesIcon } from '@heroicons/vue/outline'
 import { AdjustmentsIcon } from '@heroicons/vue/outline'
 import externalEntries from './assets/testDates.json'
@@ -59,12 +59,10 @@ export default {
         };
     },
 	computed: {
-		VisibleEntriesNew() {
-			let categories = this.visibleCategories;
-
-			return this.entries.filter(entry => categories.has(entry.lva));
-		},
 		VisibleEntries() {
+			return this.entries.filter(entry => this.visibleCategories.has(entry.lva));
+		},
+		VisibleEntriesOld() {
 			let arr = new Array();
 
 			for(let i = 0; i < this.entries.length; i++) {

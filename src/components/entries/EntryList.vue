@@ -1,6 +1,6 @@
 <script>
 import Entry from './Entry.vue'
-import Badge from './Badge.vue'
+import Badge from '../Badge.vue'
 import { CalendarIcon } from '@heroicons/vue/solid'
 
 export default {
