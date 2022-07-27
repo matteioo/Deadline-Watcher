@@ -268,7 +268,7 @@ export default {
 </script>
 
 <template>
-	<button @click="sidebarToggled = true" class="z-[5] fixed right-6 bottom-6 rounded-md bg-sky-200 p-1">
+	<button @click="sidebarToggled = true" class="z-[5] fixed right-6 bottom-6 rounded-md bg-sky-200 p-1 sm:hidden">
 		<AdjustmentsIcon class="h-8 w-8 text-sky-800"/>
 	</button>
 
