@@ -1,0 +1,19 @@
+{
+    "name": "Deadline-Watcher",
+    "short_name": "Deadline-Watcher",
+    "icons": [
+        {
+            "src": "/android-chrome-192x192.png?v=0.0.0",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "/android-chrome-512x512.png?v=0.0.0",
+            "sizes": "512x512",
+            "type": "image/png"
+        }
+    ],
+    "theme_color": "#0c4a6e",
+    "background_color": "#0c4a6e",
+    "display": "standalone"
+}
