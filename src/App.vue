@@ -441,7 +441,7 @@ export default {
 					<button @click="sidebarToggled = true" class="flex-0 z-[5] fixed right-6 bottom-4 rounded-md bg-sky-200 p-1 sm:hidden">
 						<FilterIcon class="h-8 w-8 text-sky-800"/>
 					</button>
-					<button class="flex-grow sm:flex-grow-0 inline-flex items-center justify-center rounded-md bg-blue-900 text-blue-200 p-1 sm:p-2 h-10 mr-4 sm:mr-0 sm:px-4">
+					<button class="flex-grow sm:flex-grow-0 inline-flex items-center justify-center rounded-md bg-blue-900 text-blue-200 p-1 sm:p-2 h-10 mr-4 sm:mr-0 sm:px-4 sm:mb-2">
 						<CogIcon class="h-4 w-4 mr-2"/>
 						<span>Einstellungen</span>
 					</button>

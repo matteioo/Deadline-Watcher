@@ -20,8 +20,8 @@ export default {
 <template>
 	<a href="#" class="flex flex-row justify-between py-2 px-4 text-gray-200 hover:bg-gray-800 my-1 rounded-lg cursor-pointer w-full gap-4">
 		<div class="flex flex-row-reverse gap-2 sm:gap-4 grow text-sm sm:text-base">
-			<h3 class="font-regular flex-1 line-clamp-1">{{ title }}</h3>
-			<h4>{{ category }}</h4>
+			<h3 class="flex-1 line-clamp-1">{{ title }}</h3>
+			<h4 class="text-gray-300">{{ category }}</h4>
 		</div>
 		<div class="flex items-center text-gray-300 text-sm shrink-0">
 			<CalendarIcon class="h-4 w-4 mr-2 hidden sm:inline"/>
