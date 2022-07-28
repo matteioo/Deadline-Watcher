@@ -22,8 +22,10 @@ export default {
 			<h2 class="uppercase">{{ title }}</h2>
 			<Badge :count="entries.length"/>
 		</div>
-		<div v-for="entry in entries">
-			<Entry :title="entry.title" :category="entry.lva" :date-time="entry.date"/>
+		<div class="sm:my-3">
+			<div v-for="entry in entries">
+				<Entry :title="entry.title" :category="entry.lva" :date-time="entry.date"/>
+			</div>
 		</div>
 	</div>
 </template>
