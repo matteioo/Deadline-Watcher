@@ -428,12 +428,12 @@ export default {
 				</div>
 			</aside>
 			<div class="flex flex-col gap-2 w-full">
-				<section v-if="VisibleEntries.length > 0" class="flex-grow">
+				<section v-if="VisibleEntries.length > 0" class="flex-grow sm:flex-grow-0">
 					<div v-for="visibleEntryGroup in VisibleEntriesGroups">
 						<EntryList :title="visibleEntryGroup.title" :entries="visibleEntryGroup.entries"/>
 					</div>
 				</section>
-				<section v-else class="flex-grow inline-flex flex-row text-gray-300 items-center justify-center py-2">
+				<section v-else class="flex-grow sm:flex-grow-0 inline-flex flex-row text-gray-300 items-center justify-center py-2">
 					<SparklesIcon class="h-4 w-4 mr-2"/>
 					<h2>Keine Einträge im Kalender</h2>
 				</section>
