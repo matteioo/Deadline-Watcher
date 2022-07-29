@@ -21,36 +21,42 @@ export default {
 			categories: new Set(),
 			visibleCategories: new Set(),
 			sidebarToggled: false,
+			settingsToggled: false,
 			groupingRules: {
 				default: [
 					{
 						property: "today",
 						title: "Heute",
 						visible: true,
+						start: undefined,
 						end: undefined
 					},
 					{
 						property: "tomorrow",
 						title: "Morgen",
 						visible: true,
+						start: undefined,
 						end: undefined
 					},
 					{
 						property: "thisWeek",
 						title: "Diese Woche",
 						visible: true,
+						start: undefined,
 						end: undefined
 					},
 					{
 						property: "nextWeek",
-						title: "Diese Woche",
+						title: "Nächste Woche",
 						visible: true,
+						start: undefined,
 						end: undefined
 					},
 					{
 						property: "remaining",
-						title: "Später",
+						title: "Sonstige",
 						visible: true,
+						start: undefined,
 						end: undefined
 					}
 				],
@@ -109,6 +115,10 @@ export default {
 			let tomorrow = new Date(today.getTime());
 			tomorrow.setDate(tomorrow.getDate() + 1);
 
+			// Yesterday midnight:
+			let yesterday = new Date(today.getTime());
+			yesterday.setDate(yesterday.getDate() - 1);
+
 			// This week's sunday:
 			let nextSunday = new Date(today.getTime());
 			nextSunday.setDate(today.getDate() + (6 - weekDay));
@@ -119,27 +129,30 @@ export default {
 			nextNextSunday.setDate(nextNextSunday.getDate() + 7);
 
 			return {
-				today: today,
-				tomorrow: tomorrow,
-				thisWeek: nextSunday,
-				nextWeek: nextNextSunday,
-				remaining: new Date(8640000000000000),
-				weekday: weekDay
+				today: {
+					start: yesterday,
+					end: today
+				},
+				tomorrow: {
+					start: today,
+					end: tomorrow,
+				},
+				thisWeek: {
+					start: yesterday,
+					end: nextSunday
+				},
+				nextWeek: {
+					start: nextSunday,
+					end: nextNextSunday
+				},
+				remaining: {
+					start: new Date(-8640000000000000),
+					end: new Date(8640000000000000)
+				}
 			}
 		},
 		VisibleEntries() {
 			return this.entries.filter(entry => this.visibleCategories.has(entry.lva));
-		},
-		VisibleEntriesOld() {
-			let arr = new Array();
-
-			for(let i = 0; i < this.entries.length; i++) {
-				if(this.visibleCategories.has(this.entries[i].lva)) {
-					arr.push(this.entries[i]);
-				}
-			}
-
-			return arr;
 		},
 		VisibleEntriesGroups() {
 			let visibleEntries = this.VisibleEntries;
@@ -158,160 +171,35 @@ export default {
 
 				if(currentRule.visible) {
 					outputObject[i].entries = visibleEntries.filter(entry => {
-						return entry.date.getTime() <= currentRule.end.getTime();
+						return (entry.date.getTime() > currentRule.start.getTime()) && (entry.date.getTime() <= currentRule.end.getTime());
 					});
-					visibleEntries = visibleEntries.filter(entry => entry.date.getTime() > currentRule.end.getTime());
+					visibleEntries = visibleEntries.filter(entry => !((entry.date.getTime() > currentRule.start.getTime()) && (entry.date.getTime() <= currentRule.end.getTime())));
 				}
 			}
 			return outputObject;
-		},
-		VisibleEntriesToday() {
-			return this.VisibleEntries.filter(entry => {
-				let entryDate = entry.date;
-				let currentDate = new Date();
-
-				return entryDate.toLocaleDateString() === currentDate.toLocaleDateString();
-			});
-		},
-		VisibleEntriesTomorrow() {
-			return this.VisibleEntries.filter(entry => {
-				let entryDate = new Date(entry.date.getTime());
-				entryDate = new Date(entryDate.setHours(0, 0, 0, 0));
-
-				let tomorrowDate = new Date();
-				tomorrowDate = new Date(tomorrowDate.setHours(0, 0, 0, 0));
-				tomorrowDate.setDate(tomorrowDate.getDate() + 1);
-
-				return entryDate.toLocaleDateString() === tomorrowDate.toLocaleDateString();
-			});
-		},
-		VisibleEntriesThisWeek() {
-			// Calculate todays date
-			let today = new Date();
-			today.setHours(0, 0, 0, 0);
-
-			// Calculate the date of the day after tomorrow (because the entries of today and tomorrow must be ignored)
-			let dayAfterTomorrow = new Date(today.getTime());
-			dayAfterTomorrow = new Date(dayAfterTomorrow.setDate(dayAfterTomorrow.getDate() + 2));
-			
-			// Calculate which day in the week it is; (6 - weekDay) calculates the days till next sunday
-			// 0 = Monday ... 6 = Sunday
-			const weekDay = today.getDay() != 0 ? today.getDay() - 1 : 6;
-			
-			let nextSunday = new Date(today.getTime());
-			nextSunday.setDate(today.getDate() + (6 - weekDay));
-			nextSunday.setHours(23, 59, 59, 999);
-
-			// console.log(today);
-			// console.log(dayAfterTomorrow);
-			// console.log(nextSunday);
-
-			let boundingDays = [new Date(dayAfterTomorrow.getTime()), new Date(nextSunday.getTime())];
-
-			// No days left in current week (already considered without entries of today and tomorrow), return empty array
-			if(dayAfterTomorrow.getTime() > nextSunday.getTime()) {
-				return new Array();
-			}
-
-			return this.VisibleEntries.filter(entry => (entry.date.getTime() >= boundingDays[0].getTime()) && (entry.date.getTime() <= boundingDays[1].getTime()));
-		},
-		VisibleEntriesNextWeek() {
-			// Calculate todays date
-			let today = new Date();
-			today.setHours(0, 0, 0, 0);
-
-			// Calculate the date of the day after tomorrow (because the entries of today and tomorrow must be ignored)
-			let dayAfterTomorrow = new Date(today.getTime());
-			dayAfterTomorrow = new Date(dayAfterTomorrow.setDate(dayAfterTomorrow.getDate() + 2));
-			
-			// Calculate which day in the week it is; (6 - weekDay) calculates the days till next sunday
-			// 0 = Monday ... 6 = Sunday
-			const weekDay = today.getDay() != 0 ? today.getDay() - 1 : 6;
-			
-			let nextSunday = new Date(today.getTime());
-			nextSunday.setDate(today.getDate() + (6 - weekDay));
-			nextSunday.setHours(23, 59, 59, 999);
-
-			let nextNextSunday = new Date(nextSunday.getTime());
-			nextNextSunday.setDate(nextSunday.getDate() + 7);
-
-			let boundingDays = [new Date(), new Date(nextNextSunday.getTime())];
-			// console.log("today");
-			// console.log(today);
-			// console.log("dayAfterTomorrow");
-			// console.log(dayAfterTomorrow);
-			// console.log("nextSunday");
-			// console.log(nextSunday);
-			// console.log("nextNextSunday");
-			// console.log(nextNextSunday);
-
-			if(dayAfterTomorrow.getTime() > nextSunday.getTime()) {
-				// console.log("Entry if");
-				boundingDays[0] = new Date(dayAfterTomorrow.getTime());
-			} else {
-				// console.log("Entry else");
-				boundingDays[0] = new Date(nextSunday.getTime());
-			}
-
-			return this.VisibleEntries.filter(entry => (entry.date.getTime() >= boundingDays[0].getTime()) && (entry.date.getTime() <= boundingDays[1].getTime()));
-		},
-		VisibleEntriesRemaining() {
-			// Calculate todays date
-			let today = new Date();
-			today.setHours(0, 0, 0, 0);
-
-			// Calculate the date of the day after tomorrow (because the entries of today and tomorrow must be ignored)
-			let dayAfterTomorrow = new Date(today.getTime());
-			dayAfterTomorrow = new Date(dayAfterTomorrow.setDate(dayAfterTomorrow.getDate() + 2));
-			
-			// Calculate which day in the week it is; (6 - weekDay) calculates the days till next sunday
-			// 0 = Monday ... 6 = Sunday
-			const weekDay = today.getDay() != 0 ? today.getDay() - 1 : 6;
-			
-			let nextMonday = new Date(today.getTime());
-			nextMonday.setDate(today.getDate() + (6 - weekDay) + 1);
-			nextMonday.setHours(0, 0, 0, 0);
-
-			let boundingDays = [new Date(nextMonday.getTime()), new Date()];
-			boundingDays[0].setDate(nextMonday.getDate() + 7);
-			
-			// console.log(boundingDays[0]);
-
-			return this.VisibleEntries.filter(entry => (entry.date.getTime() >= boundingDays[0].getTime()));
 		}
 	},
 	watch: {
 		sidebarToggled() {
 			document.body.classList.toggle("overflow-hidden");
-			console.log("toggled");
+		},
+		settingsToggled() {
+			document.body.classList.toggle("overflow-hidden");
+		},
+		'groupingRules.loaded': {
+			handler(newValue) {
+				console.log("rules fired");
+				console.log(newValue);
+
+				// for(let i = 0; i < this.groupingRules.loaded)
+
+				const LOCAL_STORAGE_KEY = 'appDisplaySettings';
+				// localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(this.groupingRules.));
+			},
+			deep: true
 		}
 	},
     methods: {
-        getDay(datePar) {
-            const weekday = ["So", "Mo", "Di", "Mi", "Do", "Fr", "Sa"];
-            return weekday[datePar.getDay()];
-        },
-		categoryContained(lvaToSearch) {
-			for(let i = 0; i < visibleCategories.length; i++) {
-				if(lvaToSearch === visibleCategories[i]) {
-					return true;
-				}
-			}
-
-			return false;
-		},
-		toggleCategory(lva) {
-			if(this.visibleCategories.has(lva)) {
-				this.visibleCategories.delete(lva);
-			} else {
-				this.visibleCategories.add(lva);
-			}
-		},
-		daysTillNextSunday(date) {
-			switch(this.getDay(date)) {
-
-			}
-		},
 		convertDateTime(dateTime){
 			let arr = dateTime.split(" ");
 			
@@ -360,7 +248,8 @@ export default {
 		}
 
 		for(let i = 0; i < this.groupingRules.default.length; i++) {
-			this.groupingRules.default[i].end = this.presetDays[this.groupingRules.default[i].property];
+			this.groupingRules.default[i].start = this.presetDays[this.groupingRules.default[i].property].start;
+			this.groupingRules.default[i].end = this.presetDays[this.groupingRules.default[i].property].end;
 			defaultRule = this.groupingRules.default[i];
 
 			this.groupingRules.loaded[i] = defaultRule;
@@ -376,32 +265,47 @@ export default {
 		localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(newLoadedSettings));
 		//######################################
 
-		// this.categories.sort((a, b) => {
-		// 	if (a > b) {
-		// 		return -1;
-		// 	}
-		// 	if (b > a) {
-		// 		return 1;
-		// 	}
-		// 	return 0;
-		// });
+		// Sort categories lexicographically
+		const sortedArr = Array.from(this.categories).sort();
+		this.categories = new Set(sortedArr);
 	}
 }
 </script>
 
 <template>
-	<div v-show="sidebarToggled" class="w-full sm:w-0 h-full sm:h-0 absolute top-0 left-0 z-[5] sm:hidden" @click="sidebarToggled = false"></div>
-	<div class="flex flex-row">
+	<div v-show="sidebarToggled || settingsToggled" class="fixed w-screen sm:w-0 h-screen sm:h-0 top-0 left-0 z-[5] backdrop-saturate-50 sm:hidden" @click="sidebarToggled = false, settingsToggled = false"></div>
+	<div class="flex flex-row sm:hidden">
 		<aside v-show="sidebarToggled" class="flex-grow z-10 fixed bottom-4 left-4 right-4 flex flex-col max-h-[75%] p-4 bg-gray-800 text-gray-100 rounded-xl">
-			<button class="z-[15] absolute top-4 right-4 p-1" @click="sidebarToggled = false">
-				<XIcon class="h-6 w-6 text-gray-400"/>
-			</button>
+			<div>
+				<h2 class="text-center font-medium uppercase pb-1">Filtern</h2>
+				<button class="z-[15] absolute top-3 right-4 p-1" @click="sidebarToggled = false">
+					<XIcon class="h-6 w-6 text-gray-400"/>
+				</button>
+			</div>
 			<div class="flex-grow overflow-scroll w-full">
-				<div class="flex flex-col px-2">
+				<div class="flex flex-col px-2 gap-2">
 					<div v-for="category in categories">
-						<div class="my-1 w-full inline-flex flex-row items-center">
+						<div class="w-full inline-flex flex-row items-center">
 							<input type="checkbox" :id="category" :value="category" v-model="visibleCategories" class="mr-2 accent-sky-600">
-							<label :for="category" class="inline-block flex-grow">{{ category }}</label>
+							<label :for="category" class="inline-block flex-grow text-gray-300">{{ category }}</label>
+						</div>
+					</div>
+				</div>
+			</div>
+		</aside>
+		<aside v-show="settingsToggled" class="flex-grow z-10 fixed bottom-4 left-4 right-4 flex flex-col max-h-[75%] p-4 bg-gray-800 text-gray-100 rounded-xl">
+			<div>
+				<h2 class="text-center font-medium uppercase pb-1">Einstellungen</h2>
+				<button class="z-[15] absolute top-3 right-4 p-1" @click="settingsToggled = false">
+					<XIcon class="h-6 w-6 text-gray-400"/>
+				</button>
+			</div>
+			<div class="flex-grow overflow-scroll w-full">
+				<div class="flex flex-col px-2 gap-2">
+					<div v-for="category in categories">
+						<div class="w-full inline-flex flex-row items-center">
+							<input type="checkbox" :id="category" :value="category" v-model="visibleCategories" class="mr-2 accent-sky-600">
+							<label :for="category" class="inline-block flex-grow text-gray-300">{{ category }}</label>
 						</div>
 					</div>
 				</div>
@@ -409,24 +313,20 @@ export default {
 		</aside>
 	</div>
 	
-	<div class="w-full h-full bg-gray-900 px-2" :class="{ 'brightness-50 sm:brightness-100': sidebarToggled }">
+	<div class="w-full h-full bg-gray-900 px-2" :class="{ 'brightness-50 sm:brightness-100': sidebarToggled || settingsToggled }">
 		<main class="min-h-screen text-gray-100 mx-auto max-w-screen-sm flex flex-row gap-4">
 			<aside class="shrink-0 hidden sm:block">
 				<div class="sticky top-2">
-					<!-- <div v-for="category in categories">
-						<button @click="toggleCategory(category)">Toggle {{ category }}</button>
-						<br>
-					</div> -->
 					<div v-for="category in categories">
 						<div class="px-2 py-1 my-1">
-							<input type="checkbox" :id="category" :value="category" v-model="visibleCategories" class="mr-2">
+							<input type="checkbox" :id="category" :value="category" v-model="visibleCategories" class="mr-2 accent-sky-600">
 							<label :for="category">{{ category }}</label>
 						</div>
 					</div>
 				</div>
 			</aside>
 			<div class="flex flex-col gap-2 w-full">
-				<section v-if="VisibleEntries.length > 0" class="flex-grow sm:flex-grow-0">
+				<section v-if="VisibleEntries.length > 0" class="flex-grow sm:flex-grow-0 pt-2">
 					<div v-for="visibleEntryGroup in VisibleEntriesGroups">
 						<EntryList :title="visibleEntryGroup.title" :entries="visibleEntryGroup.entries"/>
 					</div>
@@ -439,7 +339,7 @@ export default {
 					<button @click="sidebarToggled = true" class="flex-0 z-[5] fixed right-6 bottom-4 rounded-md bg-sky-200 p-1 sm:hidden">
 						<FilterIcon class="h-8 w-8 text-sky-800"/>
 					</button>
-					<button class="flex-grow sm:flex-grow-0 inline-flex items-center justify-center rounded-md bg-blue-900 text-blue-200 p-1 sm:p-2 h-10 mr-4 sm:mr-0 sm:px-4 sm:mb-2 -mt-4">
+					<button @click="settingsToggled = true" class="flex-grow sm:flex-grow-0 inline-flex items-center justify-center rounded-md bg-blue-900 text-blue-200 p-1 sm:p-2 h-10 mr-4 sm:mr-0 sm:px-4 sm:mb-2 -mt-4">
 						<CogIcon class="h-4 w-4 mr-2"/>
 						<span>Einstellungen</span>
 					</button>
